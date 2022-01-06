@@ -14,17 +14,25 @@ class LoginViewController: UIViewController {
     @IBOutlet var passwordTextField: UITextField!
     
     //MARK: - Private properties
-    private let user = "user"
-    private let password = "password"
+    private let user = User.getUserData()
         
     //MARK: - Navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        guard let welcomeVC = segue.destination as? WelcomeViewController else {return}
-        welcomeVC.user = user
+        guard let tabBarController = segue.destination as? UITabBarController else {return}
+        guard let viewControllers = tabBarController.viewControllers else {return}
+        
+        viewControllers.forEach {
+            if let welcomeVC = $0 as? WelcomeViewController {
+                welcomeVC.user = user
+            } else if let navigationVC = $0 as? UINavigationController {
+                let userInfoVC = navigationVC.topViewController as! UserInfoViewController
+                userInfoVC.user = user
+            }
+        }
     }
     //MARK: - IBActions
     @IBAction func logInButtonPressed() {
-        if userNameTextField.text != user || passwordTextField.text != password {
+        if userNameTextField.text != user.login || passwordTextField.text != user.password {
             showAlert(title: "Не правильный логин или пароль", message: "Пожалуйста введите правильный логин и пароль", textField: passwordTextField)
         }
         
@@ -32,8 +40,8 @@ class LoginViewController: UIViewController {
     
     @IBAction func forgotRegistrationData(_ sender: UIButton){
         sender.tag == 0
-        ? showAlert(title: "Упс", message: "Ваш логин: \(user)")
-        : showAlert(title: "Упс", message: "Ваш пароль: \(password)")
+        ? showAlert(title: "Упс", message: "Ваш логин: \(user.login)")
+        : showAlert(title: "Упс", message: "Ваш пароль: \(user.password)")
     }
     
     @IBAction func unwindSegue(segue:UIStoryboardSegue){
